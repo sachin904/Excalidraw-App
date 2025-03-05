@@ -1,14 +1,12 @@
-import { string, z } from "zod";
+
 import express from "express";
-import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
-
+import { prismaClient } from "@repo/database/client";
 import { userMiddleware } from "./middleware";
 import { JWT_SECRET } from "@repo/backend-common/config";
-import { signinBody, userbody } from "@repo/common/types";
-import { User } from "@repo/database/database";
+import { signinBody,userbody } from "@repo/common/types";
+
 declare global{
     namespace Express{
         export interface Request{
@@ -30,37 +28,42 @@ app.post("/signup", async function (req, res) {
         })
         return
     }
-        try{
+       
+    try{
         const userName = req.body.userName;
         const firstName = req.body.firstName;
         const lastName = req.body.lastName;
         const password = req.body.password;
-
         const hashedPassword =await bcrypt.hash(password, 5);
-        const user = await User.create({
+
+      const user = await prismaClient.user.create({
+        data:{
             userName,
             firstName,
             lastName,
-            password: hashedPassword
+            password:hashedPassword  
+        }
+      })
+      if(!user){
+        res.status(403).json({
+            msg:"username already exists "
+            
         })
-        if (!user) {
-            res.status(401).json({
-                msg: "userName already exist"
-            })
-        }
-        else {
-            res.status(200).json({
-                msg: "signed in"
-            })
-        }
+      }
+      else{
+        res.json({
+            userid:user.id,
+            msg:"you are signed in"
+        })
+      }
     }
     catch(e){
-        res.status(401).json({
-            msg:"internal server error ",
+        res.json({
+            msg:"internal server error",
             error:e
+            
         })
     }
-
     
 })
 app.post("/signin",async function (req, res) {
@@ -74,41 +77,11 @@ app.post("/signin",async function (req, res) {
         })
         return
     }
-    try{
+    
     const userName=req.body.userName;
     const password=req.body.password;
 
-    const user= await User.findOne({userName});
-    if(!user){
-        res.status(404).json({
-            msg:"invalid username"
-        })
-        return
-    }
-else{
-    const passwordMatch= await bcrypt.compare(password,user?.password) ;
-    if(!passwordMatch)
-    {
-        res.json({
-            msg:"invalid password"
-        })
-        return
-    }
-    else{
-        const token= jwt.sign({id:user._id},JWT_SECRET)
-        res.json({
-           token:token,
-           msg:"you are signed in"
-        })
-    }
-}
- }
- catch(e){
-    res.json({
-        msg:"internal server error",
-        error:e
-    })
- }
+    
 })
 
 app.post("/room",userMiddleware, (req, res) => {
