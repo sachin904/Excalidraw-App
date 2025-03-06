@@ -7,7 +7,7 @@
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "check-types": "turbo run check-types",
- "stop": "powershell -Command \"Get-NetTCPConnection -LocalPort 3000,8081 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }\""
+    "stop": "powershell -Command \"ForEach ($processId in (Get-NetTCPConnection -LocalPort 3000,8081,3001 -ErrorAction SilentlyContinue).OwningProcess) { taskkill /PID $processId /F }\""
 
 
   },

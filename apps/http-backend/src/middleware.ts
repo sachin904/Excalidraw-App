@@ -22,7 +22,7 @@ export  function userMiddleware(req:Request,res:Response,next:NextFunction){
         })
         return
        }
-       req.userId=(decode as JwtPayload).id ;
+       req.userId=(decode as JwtPayload).userId;
        next();
     }
 }

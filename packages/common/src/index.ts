@@ -10,3 +10,7 @@ export const signinBody=z.object({
     password:z.string().min(3).max(30)
 
 })
+
+export const roomBody=z.object({
+    name:z.string().min(3).max(30)
+})
