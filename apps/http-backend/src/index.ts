@@ -159,14 +159,14 @@ catch(e){
 
 })
  
-app.get("/chat/:roomId",userMiddleware,async function(req,res){
+app.get("/chat/:roomId",async function(req,res){
     try{
     const roomId=Number(req.params['roomId'])
     const chats= await prismaClient.chat.findMany({
         where:{
             roomId
         },
-        take:10,
+        take:50,
         orderBy:{
             id:"desc"
         }
@@ -181,5 +181,18 @@ app.get("/chat/:roomId",userMiddleware,async function(req,res){
             error:e
         })
     }
+})
+app.get("/room/:slug",async function(req,res){
+    const slug=(req.params["slug"]);
+
+    const room= await prismaClient.room.findFirst({
+        where:{
+            slug
+        }
+    })
+    res.status(200).json({
+        room:room
+    })
+
 })
 app.listen(3000);
