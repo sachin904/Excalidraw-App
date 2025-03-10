@@ -7,7 +7,7 @@ import WebSocket, { WebSocketServer } from "ws";
 const wss = new WebSocketServer({ port: 8080 });
 
 interface Users {
-  socket: WebSocket,
+  ws: WebSocket,
   userId: string,
   rooms: string[]
 }
@@ -45,50 +45,66 @@ wss.on("connection", function connection(ws, request) {
     users.push({
       userId,
       rooms: [],
-      socket: ws
+      ws
     })
-    ws.on("message", async function (data) {
+    ws.on("message", async function message(data) {
       try {
-      const parsedData = JSON.parse(data as unknown as string);
+      let parsedData;
+      if(typeof data!=="string"){
+        parsedData=JSON.parse(data.toString());
+
+      }
+      else{
+        parsedData=JSON.parse(data);
+      }
       if (parsedData.type === "join-room") {
-        const user = users.find(x => x.socket === ws);
+        const user = users.find(x => x.ws === ws);
         user?.rooms.push(parsedData.roomId)
+        console.log("joined room:"+user?.rooms)
       }
       if (parsedData.type === "leave-room") {
-        const user = users.find(x => x.socket === ws);
+        const user = users.find(x => x.ws === ws);
         if (!user) {
           return;
         }
         user.rooms = user.rooms.filter(x => x !== parsedData.roomId)
         console.log(user.rooms);
       }
+      console.log("message recieved");
+      console.log(parsedData);
       if (parsedData.type === "chat") {
         const roomId = parsedData.roomId;
         const message = parsedData.message;
-        await prismaClient.chat.create({
+
+        await prismaClient.shape.create({
           data:{
             userId,
-            roomId,
-            message
+            roomId:Number(roomId),
+            strokes:message
           }
-        })
+        });
         users.forEach(user => {
           if (user.rooms.includes(roomId)) {
-            user.socket.send(JSON.stringify({
+           const messagesent= user.ws.send(JSON.stringify({
               type: parsedData.type,
               message: message,
               roomId
             }));
+            console.log("messagesent:"+messagesent,roomId);
           }
+          
         });
 
       }
     }
       catch (e) {
-        console.error("error handling message:",e)
+        console.error("error in websocket:",e)
        return null;
       }
     });
   
  
 });
+
+
+

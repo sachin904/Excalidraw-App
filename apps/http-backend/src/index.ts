@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { prismaClient } from "@repo/database/client";
 import { userMiddleware } from "./middleware";
-
+import cors from "cors";
 import { roomBody, signinBody, userbody } from "@repo/common/types";
 import { JWT_SECRET } from "@repo/backend-common/config";
 
@@ -19,6 +19,7 @@ declare global {
 }
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 app.post("/signup", async function (req, res) {
 
@@ -195,4 +196,30 @@ app.get("/room/:slug",async function(req,res){
     })
 
 })
-app.listen(3000);
+app.get("/shape/:roomId",async function(req,res){
+    try{
+        console.log("checkpoint 2")
+        const roomId=Number(req.params['roomId']);
+        const shapes= await prismaClient.shape.findMany({
+            where:{
+                roomId
+            },
+            take:50,
+            orderBy:{
+                id:"desc"
+            }
+        })
+      res.json({
+        shapes:shapes
+      })
+      console.log("checkpoint 3");
+    }
+    
+    catch(e){
+        res.json({
+            msg:"internal server error ",
+            error:e
+        })
+    }
+})
+app.listen(3001);
