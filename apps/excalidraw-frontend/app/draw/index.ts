@@ -74,7 +74,7 @@ export async  function initDraw(canvas:HTMLCanvasElement,roomId:string,socket:We
              existingShape.push(shape);
               
          socket.send(JSON.stringify({
-            type:"chat",
+            type:"strokes",
             roomId:Number(roomId),
             message:JSON.stringify({
                 shape
@@ -93,7 +93,7 @@ export async  function initDraw(canvas:HTMLCanvasElement,roomId:string,socket:We
              existingShape.push(shape);
               
          socket.send(JSON.stringify({
-            type:"chat",
+            type:"strokes",
             roomId:Number(roomId),
             message:JSON.stringify({
                 shape

@@ -72,7 +72,7 @@ wss.on("connection", function connection(ws, request) {
       }
       console.log("message recieved");
       console.log(parsedData);
-      if (parsedData.type === "chat") {
+      if (parsedData.type === "strokes") {
         const roomId = parsedData.roomId;
         const message = parsedData.message;
 
@@ -83,6 +83,32 @@ wss.on("connection", function connection(ws, request) {
             strokes:message
           }
         });
+       
+        users.forEach(user => {
+          if (user.rooms.includes(roomId)) {
+           const messagesent= user.ws.send(JSON.stringify({
+              type: parsedData.type,
+              message: message,
+              roomId
+            }));
+            console.log("messagesent:"+messagesent,roomId);
+          }
+          
+        });
+
+      }
+       if (parsedData.type === "chats") {
+        const roomId = parsedData.roomId;
+        const message = parsedData.message;
+
+        await prismaClient.chat.create({
+          data:{
+            userId,
+            roomId:Number(roomId),
+            message:message
+          }
+        });
+       
         users.forEach(user => {
           if (user.rooms.includes(roomId)) {
            const messagesent= user.ws.send(JSON.stringify({

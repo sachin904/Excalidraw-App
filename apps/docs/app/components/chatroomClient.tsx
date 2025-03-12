@@ -27,7 +27,7 @@ export function ChatRoomClient({chats,id}:messagesProps){
                 
                 const parsedData= JSON.parse(event.data)
               
-                if(parsedData.type==="chat"){
+                if(parsedData.type==="chats"){
                    
                     setChats(c=>[...c,{message:parsedData.message}])
                 }
@@ -47,7 +47,7 @@ export function ChatRoomClient({chats,id}:messagesProps){
             </input>
             <button onClick={()=>{
                 socket?.send(JSON.stringify({
-                    type:"chat",
+                    type:"chats",
                     roomId:id,
                     message:currentMessage
 
