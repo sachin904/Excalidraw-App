@@ -12,5 +12,6 @@ export default async function CanvasPage({params}:{
     
     return<div>
         <RoomCanvas roomId={roomId}></RoomCanvas>
+        
     </div>
 }
